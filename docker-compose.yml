@@ -1,0 +1,39 @@
+services:
+  mysqldb:
+    container_name: mysql
+    image: mysql:8
+    environment:
+      MYSQL_ROOT_PASSWORD: exam
+      MYSQL_DATABASE: coursedb
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+
+  backend:
+    container_name: springbootonlineauction
+    build:
+      context: ./springbootproject
+      dockerfile: ../springbootproject/backend.Dockerfile
+    ports:
+      - "30032:2000"
+    environment:
+      SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/coursedb?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      SPRING_DATASOURCE_USERNAME=root
+      SPRING_DATASOURCE_PASSWORD=exam
+    depends_on:
+      - mysqldb
+    restart: on-failure
+
+  frontend:
+    container_name: reactonlineauction
+    build:
+      context: ./frontend
+      dockerfile: ../frontend/frontend.Dockerfile
+    ports:
+      - "30031:80"
+    depends_on:
+      - backend
+
+volumes:
+  mysql-data:
